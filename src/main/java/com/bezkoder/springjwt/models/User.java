@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.models;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,13 +39,27 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
+  @NotBlank
+  @Size(max = 20)
+  private String firstname;
+  @NotBlank
+  @Size(max = 20)
+  private String lastname;
+
+  private Date birthdate;
+  private Boolean isActive;
+
   public User() {
   }
 
-  public User(String username, String email, String password) {
+  public User(String username, String email, String password, String firstname, String lastname, Date birthdate) {
     this.username = username;
     this.email = email;
     this.password = password;
+    this.firstname = firstname;
+    this.lastname = lastname;
+    this.birthdate = birthdate;
+    this.isActive = true;
   }
 
   public Long getId() {
@@ -86,4 +101,37 @@ public class User {
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
   }
+
+  public String getFirstname() {
+    return firstname;
+  }
+
+  public void setFirstname(String firstname) {
+    this.firstname = firstname;
+  }
+
+  public String getLastname() {
+    return lastname;
+  }
+
+  public void setLastname(String lastname) {
+    this.lastname = lastname;
+  }
+
+  public Boolean getActive() {
+    return isActive;
+  }
+
+  public void setActive(Boolean active) {
+    isActive = active;
+  }
+
+  public Date getBirthdate() {
+    return birthdate;
+  }
+
+  public void setBirthdate(Date birthdate) {
+    this.birthdate = birthdate;
+  }
+
 }
