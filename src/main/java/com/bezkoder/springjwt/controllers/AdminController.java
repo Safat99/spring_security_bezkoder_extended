@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +26,13 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @PostMapping("/get-user-by-birthdate")
-    public ResponseEntity<List<BirthdayRangeResponse>> getUsers(@Valid @RequestBody RangeDateRequest rangeDate) {
-        List<BirthdayRangeResponse> users = adminService.getUserBetweenBirthdate(rangeDate.getStartDate(), rangeDate.getEndDate() );
+    @GetMapping("/get-user-by-birthdate")
+    public ResponseEntity<List<BirthdayRangeResponse>> getUsers(
+            @RequestParam(name = "startDate") String startDate,
+            @RequestParam(name = "endDate") String endDate
+    ) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        List<BirthdayRangeResponse> users = adminService.getUserBetweenBirthdate(dateFormat.parse(startDate), dateFormat.parse(endDate));
         return ResponseEntity.ok(users);
     }
 
