@@ -1,19 +1,18 @@
 package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.AdminService;
+import com.bezkoder.springjwt.models.ERole;
+import com.bezkoder.springjwt.models.Role;
 import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.payload.request.RangeDateRequest;
 import com.bezkoder.springjwt.payload.response.BirthdayRangeResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,12 +36,19 @@ public class AdminController {
     }
 
     @Transactional
-    @PutMapping("/deactivate-user/{id}")
+    @PatchMapping("/deactivate-user/{id}")
     public ResponseEntity<?> deactivateUser(@PathVariable Long id) {
         Optional<User> userOptional = adminService.getUserById(id);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
+
+            boolean hasAdminRole = user.getRoles().stream()
+                    .anyMatch(role -> role.getName() == ERole.ROLE_ADMIN);
+
+            if (hasAdminRole){
+                return ResponseEntity.badRequest().body(new MessageResponse("cannot deactivate another admin"));
+            }
             user.setActive(false);
             // userRepository.save(user);
 
