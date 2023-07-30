@@ -23,7 +23,6 @@ public class BirthdayRangeResponse {
     private Date birthdate;
 
     public BirthdayRangeResponse convertCustomDto(User user) {
-
         BirthdayRangeResponse customUserDto = new BirthdayRangeResponse();
 
         customUserDto.setId(user.getId());
