@@ -1,13 +1,12 @@
 package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.AdminService;
+import com.bezkoder.springjwt.exception.ResourceNotFoundException;
 import com.bezkoder.springjwt.models.ERole;
-import com.bezkoder.springjwt.models.Role;
 import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.payload.response.BirthdayRangeResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
 import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,7 +53,7 @@ public class AdminController {
 
             return ResponseEntity.ok(new MessageResponse("User updated successfully!"));
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("user not found!!");
         }
     }
 }
