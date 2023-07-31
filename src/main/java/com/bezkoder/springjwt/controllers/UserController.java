@@ -2,12 +2,16 @@ package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.EducationService;
 import com.bezkoder.springjwt.models.DegreeName;
+import com.bezkoder.springjwt.models.Education;
+import com.bezkoder.springjwt.payload.response.GetEducationResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -35,6 +39,12 @@ public class UserController {
             message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
             return ResponseEntity.badRequest().body(new MessageResponse(message));
         }
-
     }
+
+    @GetMapping("/get-user-education-info/{id}")
+    public ResponseEntity<List<GetEducationResponse>> getUserEducationInfo(@PathVariable Long id) {
+        List<GetEducationResponse> educations = educationService.getUserEducationInfo(id);
+        return ResponseEntity.ok(educations);
+    }
+
 }

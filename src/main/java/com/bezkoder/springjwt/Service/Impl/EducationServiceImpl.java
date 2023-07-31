@@ -6,6 +6,7 @@ import com.bezkoder.springjwt.exception.ResourceNotFoundException;
 import com.bezkoder.springjwt.models.DegreeName;
 import com.bezkoder.springjwt.models.Education;
 import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.payload.response.GetEducationResponse;
 import com.bezkoder.springjwt.repository.EducationRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,11 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EducationServiceImpl implements EducationService {
-
-    private final Path root = Paths.get("uploads");
-
     @Autowired
     UserRepository userRepository;
 
@@ -39,7 +39,7 @@ public class EducationServiceImpl implements EducationService {
         }
 
         String fileName = file.getOriginalFilename();
-        Path filePath = Paths.get("src/main/resources/static/uploads", fileName);
+        Path filePath = Paths.get(System.getProperty("user.dir") ,"src/main/resources/static/uploads", fileName);
 
         try {
             Files.write(filePath, file.getBytes());
@@ -56,9 +56,27 @@ public class EducationServiceImpl implements EducationService {
         education.setDegreeName(degreeName);
         education.setPassingYear(passingYear);
         education.setUser(user);
-        education.setCertificateUrl(fileName);
+        education.setCertificateUrl(filePath.toString());
 
         educationRepository.save(education);
 
+    }
+
+    @Override
+    public List<GetEducationResponse> getUserEducationInfo(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Error: User is not found."));
+
+        List<Education> educationList = educationRepository.findEducationByUserId(id);
+
+        return educationList.stream()
+                .map(education -> GetEducationResponse.builder()
+                        .id(education.getId())
+                        .username(education.getUser().getUsername())
+                        .degreeName(education.getDegreeName())
+                        .passingYear(education.getPassingYear())
+                        .certificateUrl(education.getCertificateUrl())
+                        .build()
+                )
+                .collect(Collectors.toList());
     }
 }
