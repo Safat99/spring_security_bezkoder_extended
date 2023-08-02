@@ -71,10 +71,11 @@ public class AuthServiceImpl implements AuthService {
         Set<String> strRoles = signupRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
-            roles.add(userRole);
+        if (strRoles == null || strRoles.isEmpty()) {
+//            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+//                    .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
+//            roles.add(userRole);
+            throw new ResourceNotFoundException("Error: No role found for the user.");
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
@@ -94,6 +95,8 @@ public class AuthServiceImpl implements AuthService {
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
                         roles.add(userRole);
+
+                        break;
                     default:
                         throw new BadRequestException("Error: Invalid Role given!");
                 }
