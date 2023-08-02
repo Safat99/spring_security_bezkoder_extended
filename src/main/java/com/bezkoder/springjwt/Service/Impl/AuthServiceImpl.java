@@ -10,6 +10,7 @@ import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
 import com.bezkoder.springjwt.payload.response.JwtResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
+import com.bezkoder.springjwt.payload.response.SignUpResponse;
 import com.bezkoder.springjwt.repository.RoleRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.services.UserDetailsImpl;
@@ -48,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public ResponseEntity<?> registerUser(SignupRequest signupRequest) {
+    public ResponseEntity<SignUpResponse> registerUser(SignupRequest signupRequest) {
 
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             throw new BadRequestException("Error: Username is already taken!");
@@ -106,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new SignUpResponse("User registered successfully!", user.getId()));
     }
 
     @Override

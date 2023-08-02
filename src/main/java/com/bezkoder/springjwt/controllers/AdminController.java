@@ -3,12 +3,14 @@ package com.bezkoder.springjwt.controllers;
 import com.bezkoder.springjwt.Service.AdminService;
 import com.bezkoder.springjwt.Service.EducationService;
 import com.bezkoder.springjwt.models.DegreeName;
+import com.bezkoder.springjwt.payload.request.AdminUserEducationRequest;
 import com.bezkoder.springjwt.payload.response.BirthdayRangeResponse;
 import com.bezkoder.springjwt.payload.response.GetEducationResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,17 +47,15 @@ public class AdminController {
         return ResponseEntity.ok(educations);
     }
 
-    @PatchMapping("/education")
+    @PatchMapping(value = "/education", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                                                     MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> insertEducationInfo(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("degree_name") DegreeName degreeName,
-            @RequestParam("grade") Float grade,
-            @RequestParam("passing_year") Integer passingYear,
-            @RequestParam("user_id") Long userId
-    ) {
+            @RequestPart("education_info") AdminUserEducationRequest request,
+            @RequestParam("file") MultipartFile file
+            ) {
         String message;
         try {
-            educationService.save(file, degreeName, grade, passingYear, userId);
+            educationService.save(file, request.getDegreeName(), request.getGrade(), request.getPassingYear(), request.getUserId());
 
             message = "Uploaded the file successfully: " + file.getOriginalFilename();
             return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));

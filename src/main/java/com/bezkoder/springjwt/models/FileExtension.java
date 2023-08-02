@@ -2,7 +2,7 @@ package com.bezkoder.springjwt.models;
 
 public enum FileExtension {
 
-    pdf, jpg, png;
+    pdf, jpg, jpeg, png;
 
     public static boolean isValid(String fileExtension) {
         try {
