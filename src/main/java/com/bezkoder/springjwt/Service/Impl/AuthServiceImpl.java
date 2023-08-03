@@ -20,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import org.springframework.stereotype.Service;
 
@@ -33,44 +32,37 @@ import java.util.stream.Collectors;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final JwtUtils jwtUtils;
+
+    private final SignupRequest signupRequest;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    JwtUtils jwtUtils;
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, JwtUtils jwtUtils, SignupRequest signupRequest) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.jwtUtils = jwtUtils;
+        this.signupRequest = signupRequest;
+    }
 
     @Override
-    public ResponseEntity<SignUpResponse> registerUser(SignupRequest signupRequest) {
+    public ResponseEntity<SignUpResponse> registerUser(SignupRequest request) {
 
-        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new BadRequestException("Error: Username is already taken!");
         }
 
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Error: Email is already in use!");
         }
 
         // Create new user's account
-        User user = new User(
-                signupRequest.getUsername(),
-                signupRequest.getEmail(),
-                encoder.encode(signupRequest.getPassword()),
-                signupRequest.getFirstname(),
-                signupRequest.getLastname(),
-                signupRequest.getBirthdate(),
-                signupRequest.getPhoneNumber()
-        );
+        User user = signupRequest.convertToUserEntity(request);
 
-        Set<String> strRoles = signupRequest.getRole();
+        Set<String> strRoles = request.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null || strRoles.isEmpty()) {
