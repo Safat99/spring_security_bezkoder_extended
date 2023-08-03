@@ -54,6 +54,7 @@ public class User {
 
   private Boolean isActive;
 
+  @NotBlank
   private String phoneNumber;
 
   public User() {
@@ -68,5 +69,9 @@ public class User {
     this.birthdate = birthdate;
     this.phoneNumber = phoneNumber;
     this.isActive = true;
+  }
+
+  public void setActive(Boolean active) {
+    this.isActive = active;
   }
 }
