@@ -53,16 +53,7 @@ public class AdminController {
             @RequestPart("education_info") AdminUserEducationRequest request,
             @RequestParam("file") MultipartFile file
             ) {
-        String message;
-        try {
-            educationService.save(file, request.getDegreeName(), request.getGrade(), request.getPassingYear(), request.getUserId());
-
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
-
-        } catch (Exception e) {
-            message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
-            return ResponseEntity.badRequest().body(new MessageResponse(message));
-        }
+        ResponseEntity<?> response = adminService.insertEducationInfo(file, request);
+        return response;
     }
 }

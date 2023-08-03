@@ -9,7 +9,6 @@ import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
 import com.bezkoder.springjwt.payload.response.JwtResponse;
-import com.bezkoder.springjwt.payload.response.MessageResponse;
 import com.bezkoder.springjwt.payload.response.SignUpResponse;
 import com.bezkoder.springjwt.repository.RoleRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
@@ -19,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,6 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     JwtUtils jwtUtils;
 
-
     @Override
     public ResponseEntity<SignUpResponse> registerUser(SignupRequest signupRequest) {
 
@@ -66,7 +66,8 @@ public class AuthServiceImpl implements AuthService {
                 encoder.encode(signupRequest.getPassword()),
                 signupRequest.getFirstname(),
                 signupRequest.getLastname(),
-                signupRequest.getBirthdate()
+                signupRequest.getBirthdate(),
+                signupRequest.getPhoneNumber()
         );
 
         Set<String> strRoles = signupRequest.getRole();
@@ -80,26 +81,22 @@ public class AuthServiceImpl implements AuthService {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case "admin" -> {
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
                         roles.add(adminRole);
-
-                        break;
-                    case "mod":
+                    }
+                    case "mod" -> {
                         Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
                                 .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
                         roles.add(modRole);
-
-                        break;
-                    case "user":
+                    }
+                    case "user" -> {
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
                         roles.add(userRole);
-
-                        break;
-                    default:
-                        throw new BadRequestException("Error: Invalid Role given!");
+                    }
+                    default -> throw new BadRequestException("Error: Invalid Role given!");
                 }
             });
         }
@@ -112,6 +109,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest) {
+
+        if (!Objects.equals(loginRequest.getPassword(), loginRequest.getConfirmPassword())) {
+            throw new BadRequestException("password and confirm password field must be the same");
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -120,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtResponse(jwt,
