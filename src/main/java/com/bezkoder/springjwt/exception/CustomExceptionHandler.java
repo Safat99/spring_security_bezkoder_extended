@@ -2,16 +2,19 @@ package com.bezkoder.springjwt.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // this class will serve for exception handling and multiple exceptions will be handled by its methods
 @ControllerAdvice
-public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
+public class CustomExceptionHandler {
 
     /* we are telling spring that, this method is responsible for handling ResourceNotFound exception
      *
@@ -37,6 +40,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         );
         // 2. return the response entity
         return new ResponseEntity<>(errorResponse, badRequest);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        ValidationErrorResponse errorResponse = new ValidationErrorResponse();
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setMessage("Validation failed");
+        List<String> errors = new ArrayList<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> errors.add(error.getField() + ": " + error.getDefaultMessage()));
+        errorResponse.setErrors(errors);
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
 }

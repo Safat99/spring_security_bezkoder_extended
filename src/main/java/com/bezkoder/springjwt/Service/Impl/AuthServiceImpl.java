@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.bezkoder.springjwt.security.jwt.JwtUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -36,33 +37,32 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final JwtUtils jwtUtils;
-
-    private final SignupRequest signupRequest;
+    private final PasswordEncoder encoder;
 
     @Autowired
-    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, JwtUtils jwtUtils, SignupRequest signupRequest) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, JwtUtils jwtUtils, PasswordEncoder encoder) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jwtUtils = jwtUtils;
-        this.signupRequest = signupRequest;
+        this.encoder = encoder;
     }
 
     @Override
-    public ResponseEntity<SignUpResponse> registerUser(SignupRequest request) {
+    public ResponseEntity<SignUpResponse> registerUser(SignupRequest signupRequest) {
 
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
             throw new BadRequestException("Error: Username is already taken!");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new BadRequestException("Error: Email is already in use!");
         }
 
         // Create new user's account
-        User user = signupRequest.convertToUserEntity(request);
-
-        Set<String> strRoles = request.getRole();
+        User user = signupRequest.convertToUserEntity(signupRequest);
+        user.setPassword(encoder.encode(user.getPassword()));
+        Set<String> strRoles = signupRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null || strRoles.isEmpty()) {

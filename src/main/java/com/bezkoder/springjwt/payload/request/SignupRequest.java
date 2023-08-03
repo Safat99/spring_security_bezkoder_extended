@@ -1,6 +1,5 @@
 package com.bezkoder.springjwt.payload.request;
 
-import java.beans.Encoder;
 import java.util.Date;
 import java.util.Set;
 
@@ -8,16 +7,12 @@ import com.bezkoder.springjwt.models.User;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class SignupRequest {
-  private final PasswordEncoder encoder;
-
-  public SignupRequest(PasswordEncoder encoder) {
-    this.encoder = encoder;
-  }
 
   @NotBlank
   @Size(min = 3, max = 20)
@@ -25,7 +20,7 @@ public class SignupRequest {
 
   @NotBlank
   @Size(max = 50)
-  @Email
+  @Email(message = "must be a valid email")
   private String email;
 
   private Set<String> role;
@@ -45,17 +40,28 @@ public class SignupRequest {
   private Date birthdate;
 
   @NotBlank
-  @Pattern(regexp = "\\d{7,11}", message = "phone Number ")
+  @Pattern(regexp = "\\d{7,11}", message = "phone Number is not okay")
   private String phoneNumber;
 
   public User convertToUserEntity(SignupRequest signupRequest) {
-    return User.builder()
-            .username(signupRequest.getUsername())
-            .email(signupRequest.getEmail())
-            .firstname(signupRequest.getFirstname())
-            .lastname(signupRequest.getLastname())
-            .birthdate(signupRequest.getBirthdate())
-            .password(encoder.encode(signupRequest.getPassword()) )
-            .build();
+    User user = new User();
+
+    user.setUsername(signupRequest.getUsername());
+    user.setEmail(signupRequest.getEmail());
+    user.setPassword(signupRequest.getPassword());
+    user.setFirstname(signupRequest.getFirstname());
+    user.setLastname(signupRequest.getLastname());
+    user.setBirthdate(signupRequest.getBirthdate());
+    user.setPhoneNumber(signupRequest.getPhoneNumber());
+
+    return user;
+//    return User.builder()
+//            .username(signupRequest.getUsername())
+//            .email(signupRequest.getEmail())
+//            .firstname(signupRequest.getFirstname())
+//            .lastname(signupRequest.getLastname())
+//            .birthdate(signupRequest.getBirthdate())
+//            .password(encoder.encode(signupRequest.getPassword()) )
+//            .build();
   }
 }
