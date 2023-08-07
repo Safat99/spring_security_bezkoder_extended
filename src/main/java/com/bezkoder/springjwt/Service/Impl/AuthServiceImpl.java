@@ -38,18 +38,20 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder encoder;
+    private final OtpServiceImpl otpService;
 
     @Autowired
-    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, JwtUtils jwtUtils, PasswordEncoder encoder) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, JwtUtils jwtUtils, PasswordEncoder encoder, OtpServiceImpl otpService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
+        this.otpService = otpService;
     }
 
     @Override
-    public ResponseEntity<SignUpResponse> registerUser(SignupRequest signupRequest) {
+    public ResponseEntity<?> registerUser(SignupRequest signupRequest) {
 
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             throw new BadRequestException("Error: Username is already taken!");
@@ -92,11 +94,23 @@ public class AuthServiceImpl implements AuthService {
                 }
             });
         }
-
         user.setRoles(roles);
-        userRepository.save(user);
 
-        return ResponseEntity.ok(new SignUpResponse("User registered successfully!", user.getId()));
+        // check whether valid email and sent otp if everything okay
+        String otp = otpService.generateRandomOtp(6);
+        ResponseEntity<?> otpResponse = otpService.sendOtp(signupRequest.getEmail(), otp);
+
+        if (otpResponse.getStatusCode().isError()) {
+            return otpResponse;
+        }
+
+        return ResponseEntity.ok(user);
+
+
+
+//        userRepository.save(user);
+//
+//        return ResponseEntity.ok(new SignUpResponse("User registered successfully!", user.getId()));
     }
 
     @Override

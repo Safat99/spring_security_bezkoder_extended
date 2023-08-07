@@ -53,7 +53,6 @@ public class AdminController {
             @RequestPart("education_info") AdminUserEducationRequest request,
             @RequestParam("file") MultipartFile file
             ) {
-        ResponseEntity<?> response = adminService.insertEducationInfo(file, request);
-        return response;
+        return adminService.insertEducationInfo(file, request);
     }
 }
