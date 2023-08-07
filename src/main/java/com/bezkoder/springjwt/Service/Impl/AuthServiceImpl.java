@@ -14,6 +14,7 @@ import com.bezkoder.springjwt.repository.RoleRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,10 +25,7 @@ import com.bezkoder.springjwt.security.jwt.JwtUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,12 +102,9 @@ public class AuthServiceImpl implements AuthService {
             return otpResponse;
         }
 
-        return ResponseEntity.ok(user);
+        userRepository.save(user);
+        return otpResponse;
 
-
-
-//        userRepository.save(user);
-//
 //        return ResponseEntity.ok(new SignUpResponse("User registered successfully!", user.getId()));
     }
 
@@ -136,6 +131,22 @@ public class AuthServiceImpl implements AuthService {
                 userDetails.getUsername(),
                 userDetails.getEmail(),
                 roles));
+    }
+
+    @Override
+    public ResponseEntity<?> verifyUser(String email, String otp) {
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("email not exists"));
+
+        boolean otpVerified = otpService.validateOtp(email, otp);
+        if (!otpVerified) {
+           throw new ResourceNotFoundException("otp not matched");
+        }
+
+        user.setVerified(true);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("user verified and registered successfully");
     }
 
 

@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Boolean existsByUsername(String username);
 
+  Optional<User> findByEmail(String email);
+
   Boolean existsByEmail(String email);
 
   List<User> findByBirthdateBetween(Date startDate, Date endDate);

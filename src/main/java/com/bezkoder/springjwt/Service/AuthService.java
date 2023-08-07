@@ -10,4 +10,6 @@ public interface AuthService {
     public ResponseEntity<?> registerUser(SignupRequest signupRequest);
 
     public ResponseEntity<?> authenticateUser(LoginRequest loginRequest);
+
+    public ResponseEntity<?> verifyUser(String email, String otp);
 }

@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.Service.AuthService;
+import com.bezkoder.springjwt.payload.request.ValidateUserRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         return authService.registerUser(signupRequest);
+    }
+
+    @PostMapping("/validate-user")
+    public ResponseEntity<?> validateUser(@RequestBody ValidateUserRequest request) {
+        return authService.verifyUser(request.getEmail(), request.getOtp());
     }
 }

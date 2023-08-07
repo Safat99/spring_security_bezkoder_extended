@@ -27,7 +27,7 @@ public class SignupRequest {
 
   @NotBlank
   @Size(min = 6, max = 40)
-  @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{6,40}$",
+  @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&_]{6,40}$",
           message = "password must contains 1 small, 1 caps, 1 digit and 1 special character")
   private String password;
 

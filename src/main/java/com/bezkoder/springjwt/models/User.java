@@ -58,6 +58,8 @@ public class User {
   @NotBlank
   private String phoneNumber;
 
+  private Boolean isVerified = false;
+
   public User() {
   }
 
@@ -70,9 +72,14 @@ public class User {
     this.birthdate = birthdate;
     this.phoneNumber = phoneNumber;
     this.isActive = true;
+    this.isVerified = false;
   }
 
   public void setActive(Boolean active) {
     this.isActive = active;
+  }
+
+  public void setVerified(boolean verified) {
+    this.isVerified = verified;
   }
 }
